@@ -89,10 +89,23 @@ def test_socket_by_protocol():
     assert isinstance(s, socket._socketobject)
 
 
+def test_response_by_socket():
+    url = 'https://movie.douban.com'
+    protocol, host, port, path = parsed_url(url)
+    s = socket_by_protocol(protocol)
+    s.connect((host, port))
+    request = b"""GET {} HTTP/1.1
+Host: {}
+
+""".format(path, host)
+    s.send(request)
+    r = response_by_socket(s)
+    print r.decode('utf-8')
+
 def test():
     test_parsed_url()
     test_socket_by_protocol()
-
+    test_response_by_socket()
 
 
 def main():
