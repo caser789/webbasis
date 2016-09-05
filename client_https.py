@@ -1,7 +1,6 @@
 import socket
 import ssl
 
-s = ssl.wrap_socket(socket.socket())
 
 def parsed_url(url):
     """
@@ -30,6 +29,10 @@ def socket_by_protocol(protocol):
     """
     return a socket instance according to protocol
     """
+    s = socket.socket()
+    if protocol == 'https':
+        s = ssl.wrap_socket(s)
+    return s
 
 
 def response_by_socket(s):
@@ -37,6 +40,14 @@ def response_by_socket(s):
     s is a socket instance
     return all data in this socket
     """
+    response = b''
+    while True:
+        r = s.recv(1024)
+        if len(r) == 0:
+            break
+        response += r
+    return response
+
 
 def parsed_response(r):
     """
@@ -69,9 +80,19 @@ def test_parsed_url():
         assert item[1:] == parsed_url(item[0])
 
 
+def test_socket_by_protocol():
+    protocol = 'https'
+    s = socket_by_protocol(protocol)
+    assert isinstance(s, ssl.SSLSocket)
+    protocol = 'http'
+    s = socket_by_protocol(protocol)
+    assert isinstance(s, socket._socketobject)
+
 
 def test():
     test_parsed_url()
+    test_socket_by_protocol()
+
 
 
 def main():
